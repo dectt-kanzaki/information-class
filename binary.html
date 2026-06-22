@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>情報Ⅰ 基数変換マスターへの道</title>
+
+<style>
+
+body{
+    margin:0;
+    padding:20px;
+    font-family:"Yu Gothic",sans-serif;
+    background:linear-gradient(135deg,#e3f2fd,#f3e5f5);
+    text-align:center;
+}
+
+h1{
+    color:#1565c0;
+}
+
+.section{
+    background:white;
+    max-width:1200px;
+    margin:20px auto;
+    padding:20px;
+    border-radius:15px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.15);
+}
+
+.question{
+    font-size:28px;
+    font-weight:bold;
+    color:#d84315;
+    margin:15px;
+}
+
+.result{
+    font-size:22px;
+    margin:10px;
+    font-weight:bold;
+}
+
+button{
+    padding:10px 20px;
+    font-size:18px;
+    cursor:pointer;
+    border:none;
+    border-radius:10px;
+}
+
+button:hover{
+    transform:scale(1.05);
+}
+
+.lamps{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    flex-wrap:wrap;
+    margin:20px 0;
+}
+
+.lampbox{
+    text-align:center;
+}
+
+.weight{
+    font-weight:bold;
+    margin-bottom:5px;
+}
+
+.lamp{
+    width:55px;
+    height:55px;
+    border-radius:50%;
+    background:#999;
+    border:3px solid #444;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.lamp.on{
+    background:gold;
+    box-shadow:0 0 18px gold;
+}
+
+.correct{
+    color:green;
+    font-size:24px;
+    font-weight:bold;
+    margin-top:15px;
+}
+
+.binaryDisplay{
+    font-family:monospace;
+    font-size:22px;
+    letter-spacing:3px;
+    margin-top:10px;
+}
+
+.rgbRow{
+    margin-top:30px;
+}
+
+.rgbTitle{
+    font-size:26px;
+    font-weight:bold;
+    margin-bottom:10px;
+}
+
+.red{
+    color:#e53935;
+}
+
+.green{
+    color:#43a047;
+}
+
+.blue{
+    color:#1e88e5;
+}
+
+.rgbLamps{
+    display:flex;
+    justify-content:center;
+    gap:35px;
+}
+
+.nibble{
+    display:flex;
+    gap:8px;
+}
+
+.hexValue{
+    font-size:26px;
+    margin-top:10px;
+    font-weight:bold;
+}
+
+.colorCompare{
+    display:flex;
+    justify-content:center;
+    gap:50px;
+    flex-wrap:wrap;
+    margin:20px 0;
+}
+
+.colorPanel{
+    text-align:center;
+}
+
+.colorLabel{
+    font-size:22px;
+    font-weight:bold;
+    margin-bottom:10px;
+}
+
+.colorCode{
+    font-size:30px;
+    font-weight:bold;
+    margin-bottom:10px;
+}
+
+.colorSample{
+    width:180px;
+    height:90px;
+    border:3px solid black;
+    border-radius:10px;
+    margin:auto;
+}
+
+</style>
+</head>
+<body>
+
+<h1>情報Ⅰ 基数変換マスターへの道</h1>
+
+<div class="section">
+
+<h2>① ランプで学ぶ 2進数 ⇔ 10進数</h2>
+
+<div class="question" id="decimalQuestion"></div>
+
+<div class="lamps" id="decimalLamps"></div>
+
+<div class="result">
+2進数：
+<span id="binaryValue">00000000</span>
+</div>
+
+<div class="result">
+10進数：
+<span id="decimalValue">0</span>
+</div>
+
+<button onclick="newDecimalQuestion()">
+新しい問題
+</button>
+
+<div id="decimalJudge"></div>
+
+</div>
+
+<div class="section">
+
+<h2>② RGBカラーで学ぶ 2進数 ⇔ 16進数</h2>
+
+<div class="question" id="colorQuestion">
+問題：#000000 を作ろう！
+</div>
+
+<div class="colorCompare">
+
+    <div class="colorPanel">
+
+        <div class="colorLabel">
+        問題の色
+        </div>
+
+        <div class="colorCode" id="targetCode">
+        #000000
+        </div>
+
+        <div class="colorSample" id="targetColor"></div>
+
+    </div>
+
+    <div class="colorPanel">
+
+        <div class="colorLabel">
+        あなたが作った色
+        </div>
+
+        <div class="colorCode" id="myColorCode">
+        #000000
+        </div>
+
+        <div class="colorSample" id="myColor"></div>
+
+    </div>
+
+</div>
+
+<button onclick="randomColorQuestion()">
+新しい問題
+</button>
+
+<div id="colorJudge"></div>
+
+<div class="rgbRow">
+
+<div class="rgbTitle red">R（赤）</div>
+
+<div class="rgbLamps" id="rLamps"></div>
+
+<div class="binaryDisplay" id="rBinary">
+0000 0000
+</div>
+
+<div class="hexValue">
+R =
+<span id="rHex">00</span>
+</div>
+
+</div>
+
+<div class="rgbRow">
+
+<div class="rgbTitle green">G（緑）</div>
+
+<div class="rgbLamps" id="gLamps"></div>
+
+<div class="binaryDisplay" id="gBinary">
+0000 0000
+</div>
+
+<div class="hexValue">
+G =
+<span id="gHex">00</span>
+</div>
+
+</div>
+
+<div class="rgbRow">
+
+<div class="rgbTitle blue">B（青）</div>
+
+<div class="rgbLamps" id="bLamps"></div>
+
+<div class="binaryDisplay" id="bBinary">
+0000 0000
+</div>
+
+<div class="hexValue">
+B =
+<span id="bHex">00</span>
+</div>
+
+</div>
+<script>
+
+const weights=[128,64,32,16,8,4,2,1];
+const nibbleWeights=[8,4,2,1];
+
+//
+// ① 2進数 ⇔ 10進数
+//
+
+const decimalLamps=document.getElementById("decimalLamps");
+let decimalTarget=0;
+
+weights.forEach((w,index)=>{
+
+    const box=document.createElement("div");
+    box.className="lampbox";
+
+    const weight=document.createElement("div");
+    weight.className="weight";
+    weight.textContent=w;
+
+    const lamp=document.createElement("div");
+    lamp.className="lamp";
+
+    lamp.onclick=()=>{
+        lamp.classList.toggle("on");
+        updateDecimal();
+    };
+
+    box.appendChild(weight);
+    box.appendChild(lamp);
+
+    decimalLamps.appendChild(box);
+
+});
+
+function updateDecimal(){
+
+    const lamps=document.querySelectorAll("#decimalLamps .lamp");
+
+    let binary="";
+    let total=0;
+
+    lamps.forEach((lamp,index)=>{
+
+        if(lamp.classList.contains("on")){
+            binary+="1";
+            total+=weights[index];
+        }else{
+            binary+="0";
+        }
+
+    });
+
+    document.getElementById("binaryValue").textContent=binary;
+    document.getElementById("decimalValue").textContent=total;
+
+    if(total===decimalTarget){
+
+        document.getElementById("decimalJudge").innerHTML=
+        '<div class="correct">🎉 正解！</div>';
+
+    }else{
+
+        document.getElementById("decimalJudge").innerHTML="";
+
+    }
+
+}
+
+function newDecimalQuestion(){
+
+    decimalTarget=Math.floor(Math.random()*256);
+
+    document.getElementById("decimalQuestion").textContent=
+    "10進数 " + decimalTarget + " を作ろう！";
+
+    document.querySelectorAll("#decimalLamps .lamp").forEach(l=>{
+        l.classList.remove("on");
+    });
+
+    document.getElementById("decimalJudge").innerHTML="";
+
+    updateDecimal();
+
+}
+
+newDecimalQuestion();
+
+//
+// ② RGBカラー ⇔ 16進数
+//
+
+function createRGBLamps(containerId){
+
+    const container=document.getElementById(containerId);
+
+    for(let group=0;group<2;group++){
+
+        const nibble=document.createElement("div");
+        nibble.className="nibble";
+
+        nibbleWeights.forEach(w=>{
+
+            const box=document.createElement("div");
+            box.className="lampbox";
+
+            const weight=document.createElement("div");
+            weight.className="weight";
+            weight.textContent=w;
+
+            const lamp=document.createElement("div");
+            lamp.className="lamp";
+
+            lamp.onclick=()=>{
+                lamp.classList.toggle("on");
+                updateRGB();
+            };
+
+            box.appendChild(weight);
+            box.appendChild(lamp);
+
+            nibble.appendChild(box);
+
+        });
+
+        container.appendChild(nibble);
+
+    }
+
+}
+
+createRGBLamps("rLamps");
+createRGBLamps("gLamps");
+createRGBLamps("bLamps");
+
+function getRGBData(containerId){
+
+    const lamps=document.querySelectorAll(`#${containerId} .lamp`);
+
+    let binary="";
+    let value=0;
+
+    lamps.forEach((lamp,index)=>{
+
+        if(lamp.classList.contains("on")){
+            binary+="1";
+            value+=Math.pow(2,7-index);
+        }else{
+            binary+="0";
+        }
+
+    });
+
+    const displayBinary=
+    binary.substring(0,4)+" "+binary.substring(4);
+
+    const hex=
+    value.toString(16)
+    .toUpperCase()
+    .padStart(2,"0");
+
+    return{
+        value:value,
+        binary:displayBinary,
+        hex:hex
+    };
+
+}
+
+let targetColor="";
+
+function updateRGB(){
+
+    const r=getRGBData("rLamps");
+    const g=getRGBData("gLamps");
+    const b=getRGBData("bLamps");
+
+    document.getElementById("rBinary").textContent=r.binary;
+    document.getElementById("gBinary").textContent=g.binary;
+    document.getElementById("bBinary").textContent=b.binary;
+
+    document.getElementById("rHex").textContent=r.hex;
+    document.getElementById("gHex").textContent=g.hex;
+    document.getElementById("bHex").textContent=b.hex;
+
+    const hexColor=
+    "#" +
+    r.hex +
+    g.hex +
+    b.hex;
+
+    document.getElementById("myColorCode").textContent=
+    hexColor;
+
+    document.getElementById("myColor").style.background=
+    hexColor;
+
+    if(targetColor!=="" && hexColor===targetColor){
+
+        document.getElementById("colorJudge").innerHTML=
+        '<div class="correct">🎉 正解！カラーコードを再現できました！</div>';
+
+    }else{
+
+        document.getElementById("colorJudge").innerHTML="";
+
+    }
+
+}
+
+function randomColorQuestion(){
+
+    const r=Math.floor(Math.random()*256);
+    const g=Math.floor(Math.random()*256);
+    const b=Math.floor(Math.random()*256);
+
+    targetColor=
+    "#" +
+    r.toString(16).toUpperCase().padStart(2,"0") +
+    g.toString(16).toUpperCase().padStart(2,"0") +
+    b.toString(16).toUpperCase().padStart(2,"0");
+
+    document.getElementById("colorQuestion").textContent=
+    "問題：" + targetColor + " を作ろう！";
+
+    document.getElementById("targetCode").textContent=
+    targetColor;
+
+    document.getElementById("targetColor").style.background=
+    targetColor;
+
+    document.getElementById("colorJudge").innerHTML="";
+
+}
+
+randomColorQuestion();
+updateRGB();
+
+</script>
+
+</div>
+
+</body>
+</html>
+
+
