@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>情報量モンスター育成ゲーム</title>
+
+<style>
+body{
+    margin:0;
+    font-family:"Yu Gothic",sans-serif;
+    background:linear-gradient(135deg,#d7f0ff,#fff4d6);
+}
+
+h1{
+    text-align:center;
+    color:#004080;
+}
+
+.container{
+    display:flex;
+    gap:20px;
+    padding:20px;
+    flex-wrap:wrap;
+}
+
+.game,.calc{
+    background:#fff;
+    border-radius:15px;
+    padding:20px;
+    box-shadow:0 4px 12px rgba(0,0,0,.15);
+}
+
+.game{
+    flex:2;
+    min-width:320px;
+}
+
+.calc{
+    flex:1;
+    min-width:260px;
+}
+
+.info{
+    background:#eef8ff;
+    border-left:6px solid #2196f3;
+    padding:15px;
+    margin-bottom:20px;
+    border-radius:10px;
+    line-height:1.8;
+}
+
+.bar{
+    height:24px;
+    background:#ddd;
+    border-radius:12px;
+    overflow:hidden;
+}
+
+.fill{
+    height:100%;
+    width:0%;
+    background:#4caf50;
+    transition:.4s;
+}
+
+.problem{
+    font-size:32px;
+    text-align:center;
+    margin:25px 0;
+    font-weight:bold;
+    min-height:60px;
+}
+
+input.answer{
+    font-size:28px;
+    width:180px;
+    text-align:center;
+}
+
+button{
+    padding:10px 18px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    margin:5px;
+}
+
+.main{
+    background:#2196f3;
+    color:white;
+}
+
+.start{
+    background:#4caf50;
+    color:white;
+}
+
+.stop{
+    background:#f44336;
+    color:white;
+}
+
+button:hover{
+    opacity:0.9;
+}
+
+#result{
+    font-size:22px;
+    text-align:center;
+    margin-top:15px;
+    min-height:40px;
+}
+
+.calc input{
+    width:100%;
+    height:50px;
+    font-size:24px;
+    text-align:right;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:6px;
+    margin-top:10px;
+}
+
+.grid button{
+    height:55px;
+    font-size:20px;
+}
+
+.levelup{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.8);
+    color:white;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    font-size:40px;
+    text-align:center;
+    z-index:999;
+}
+
+.status{
+    text-align:center;
+    font-size:18px;
+    color:#666;
+}
+
+/* モンスター表示 */
+
+#monsterArea{
+    text-align:center;
+    margin:20px 0;
+}
+
+#monsterIcon{
+    font-size:120px;
+    transition:0.5s;
+}
+
+#monsterName{
+    font-size:24px;
+    font-weight:bold;
+    color:#444;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🥚 情報量モンスター育成ゲーム 🦅</h1>
+
+<div class="levelup" id="levelup"></div>
+
+<div class="container">
+
+<div class="game">
+
+<div class="info">
+<b>【操作手順】</b><br>
+① スタートボタンで学習はじめ<br>
+② 判定ボタンで正誤確認<br>
+③ 次の問題ボタンで進む<br>
+④ 終了ボタンでやめる
+</div>
+
+<h2>
+現在レベル：
+<span id="level">1</span>
+</h2>
+
+<div id="monsterArea">
+
+<div id="monsterIcon">
+🥚
+</div>
+
+<div id="monsterName">
+卵
+</div>
+
+</div>
+
+<div>
+進捗：
+<span id="progressText">0/5</span>
+</div>
+
+<div class="bar">
+<div class="fill" id="fill"></div>
+</div>
+
+<div class="problem" id="problem">
+スタートボタンを押してください
+</div>
+
+<div style="text-align:center">
+
+<input
+id="answer"
+class="answer"
+type="number"
+step="any"
+disabled>
+
+</div>
+
+<div style="text-align:center;margin-top:15px">
+
+<button
+class="start"
+onclick="startGame()">
+スタート
+</button>
+
+<button
+class="main"
+id="judgeBtn"
+onclick="checkAnswer()"
+disabled>
+判定
+</button>
+
+<button
+class="main"
+id="nextBtn"
+onclick="newProblem()"
+disabled>
+次の問題
+</button>
+
+<button
+class="stop"
+onclick="stopGame()">
+終了
+</button>
+
+</div>
+
+<div id="result"></div>
+
+<div class="status" id="status">
+待機中
+</div>
+
+</div>
+
+<div class="calc">
+
+<h2>🧮 計算用電卓</h2>
+
+<input id="disp" readonly>
+
+<div class="grid">
+
+<button onclick="p('7')">7</button>
+<button onclick="p('8')">8</button>
+<button onclick="p('9')">9</button>
+<button onclick="p('/')">÷</button>
+
+<button onclick="p('4')">4</button>
+<button onclick="p('5')">5</button>
+<button onclick="p('6')">6</button>
+<button onclick="p('*')">×</button>
+
+<button onclick="p('1')">1</button>
+<button onclick="p('2')">2</button>
+<button onclick="p('3')">3</button>
+<button onclick="p('-')">−</button>
+
+<button onclick="p('0')">0</button>
+<button onclick="p('.')">.</button>
+
+<button onclick="calc()">=</button>
+
+<button onclick="p('+')">+</button>
+
+<button
+style="grid-column:span 4"
+onclick="clr()">
+C
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+const U={
+    bit:1/8,
+    B:1,
+    KB:1000,
+    MB:1000000,
+    GB:1000000000,
+    TB:1000000000000
+};
+
+const monsters=[
+    {icon:"🥚",name:"卵"},
+    {icon:"🐣",name:"ひな"},
+    {icon:"🐤",name:"小鳥"},
+    {icon:"🐦",name:"成長鳥"},
+    {icon:"🦅",name:"タカ"},
+    {icon:"👑🦅",name:"ワシ"}
+];
+
+const levels=[
+
+    [['bit','B']],
+
+    [['B','KB']],
+
+    [['KB','MB']],
+
+    [['MB','GB']],
+
+    [['GB','TB']],
+
+    [
+        ['bit','B'],
+        ['bit','KB'],
+
+        ['B','bit'],
+        ['B','KB'],
+
+        ['KB','MB'],
+        ['MB','KB'],
+
+        ['MB','GB'],
+        ['GB','MB'],
+
+        ['GB','TB'],
+        ['TB','GB']
+    ]
+];
+
+let level=1;
+let streak=0;
+let total=0;
+let correct=0;
+let ans=0;
+let started=false;
+
+function updateMonster(){
+
+    const m=monsters[level-1];
+
+    document.getElementById("monsterIcon").innerHTML=
+    m.icon;
+
+    document.getElementById("monsterName").innerHTML=
+    m.name;
+}
+
+function startGame(){
+
+    level=1;
+    streak=0;
+    total=0;
+    correct=0;
+    started=true;
+
+    document.getElementById("answer").disabled=false;
+    document.getElementById("judgeBtn").disabled=false;
+    document.getElementById("nextBtn").disabled=false;
+
+    document.getElementById("result").innerHTML="";
+    document.getElementById("status").innerHTML="学習中";
+
+    updateMonster();
+    updateBar();
+    makeProblem();
+}
+
+function stopGame(){
+
+    started=false;
+
+    document.getElementById("answer").disabled=true;
+    document.getElementById("judgeBtn").disabled=true;
+    document.getElementById("nextBtn").disabled=true;
+
+    document.getElementById("problem").innerHTML=
+    "学習を終了しました";
+
+    document.getElementById("result").innerHTML="";
+    document.getElementById("status").innerHTML=
+    "終了";
+}
+
+function makeProblem(){
+
+    let pairs=levels[level-1];
+
+    let pair=
+    pairs[Math.floor(
+        Math.random()*pairs.length
+    )];
+
+    let a=pair[0];
+    let b=pair[1];
+
+    if(level<6){
+
+        if(Math.random()<0.5){
+
+            let t=a;
+            a=b;
+            b=t;
+        }
+    }
+
+    let n;
+
+    if(a==="bit" || b==="bit"){
+
+        if(a==="bit"){
+
+            const bitList=[
+                8,16,24,32,40,
+                48,56,64,80,
+                96,128,256,
+                512,1024
+            ];
+
+            n=
+            bitList[
+                Math.floor(
+                    Math.random()*
+                    bitList.length
+                )
+            ];
+
+        }else{
+
+            const byteList=[
+                1,2,5,10,20,
+                50,100,200,
+                500,1000
+            ];
+
+            n=
+            byteList[
+                Math.floor(
+                    Math.random()*
+                    byteList.length
+                )
+            ];
+        }
+
+    }else{
+
+        const list=[
+            1,2,5,10,20,
+            50,100,200,
+            500,1000
+        ];
+
+        n=
+        list[
+            Math.floor(
+                Math.random()*
+                list.length
+            )
+        ];
+    }
+
+    let bytes=n*U[a];
+
+    ans=bytes/U[b];
+
+    document.getElementById("problem").innerHTML=
+    `${n} ${a} ＝ □ ${b}`;
+
+    document.getElementById("answer").value="";
+
+    document.getElementById("answer").focus();
+}
+
+function newProblem(){
+
+    if(!started) return;
+
+    document.getElementById("result").innerHTML="";
+
+    makeProblem();
+}
+
+function updateBar(){
+
+    let goal=
+    (level<6)?5:10;
+
+    document.getElementById(
+        "progressText"
+    ).textContent=
+    `${streak}/${goal}`;
+
+    document.getElementById(
+        "fill"
+    ).style.width=
+    (streak/goal*100)+"%";
+
+    document.getElementById(
+        "level"
+    ).textContent=
+    level;
+
+    updateMonster();
+}
+
+function checkAnswer(){
+
+    if(!started) return;
+
+    let v=parseFloat(
+        document.getElementById(
+            "answer"
+        ).value
+    );
+
+    if(v===ans){
+
+        correct++;
+        streak++;
+
+        document.getElementById(
+            "result"
+        ).innerHTML=
+        "⭕ 正解！";
+
+    }else{
+
+        streak=0;
+
+        document.getElementById(
+            "result"
+        ).innerHTML=
+        `❌ 不正解（正解：${ans}）`;
+    }
+
+    total++;
+
+    if(level<6 && streak>=5){
+
+        level++;
+        streak=0;
+
+        showLevelUp();
+
+        return;
+    }
+
+    if(level===6 && streak>=10){
+
+        finish();
+
+        return;
+    }
+
+    updateBar();
+}
+
+function showLevelUp(){
+
+    let d=
+    document.getElementById(
+        "levelup"
+    );
+
+    d.style.display="flex";
+
+    if(level===6){
+
+        d.innerHTML=
+        "🌟 SPECIAL STAGE 🌟<br>レベル6解放！";
+
+    }else{
+
+        d.innerHTML=
+        `🎉 LEVEL UP!<br>Lv.${level-1} → Lv.${level}`;
+    }
+
+    setTimeout(()=>{
+
+        d.style.display="none";
+
+    },2000);
+
+    updateBar();
+
+    makeProblem();
+}
+
+function finish(){
+
+    let rate=
+    Math.round(
+        correct/total*100
+    );
+
+    let title=
+    "ビット見習い";
+
+    if(rate===100){
+
+        title=
+        "情報量の神";
+
+    }else if(rate>=90){
+
+        title=
+        "テラバイトの支配者";
+
+    }else if(rate>=80){
+
+        title=
+        "ギガマスター";
+
+    }else if(rate>=70){
+
+        title=
+        "メガ研究員";
+
+    }else if(rate>=60){
+
+        title=
+        "キロ探検家";
+    }
+
+    document.getElementById(
+        "monsterIcon"
+    ).innerHTML=
+    "👑🦅";
+
+    document.getElementById(
+        "monsterName"
+    ).innerHTML=
+    "伝説の情報量ワシ";
+
+    document.getElementById(
+        "problem"
+    ).innerHTML=
+    `👑 スペシャルステージクリア！<br>${title}`;
+
+    document.getElementById(
+        "result"
+    ).innerHTML=
+    `正解率 ${rate}%（${correct}/${total}）`;
+
+    document.getElementById(
+        "status"
+    ).innerHTML=
+    "全レベルクリア！";
+
+    started=false;
+
+    document.getElementById(
+        "answer"
+    ).disabled=true;
+
+    document.getElementById(
+        "judgeBtn"
+    ).disabled=true;
+
+    document.getElementById(
+        "nextBtn"
+    ).disabled=true;
+}
+
+function p(x){
+
+    disp.value+=x;
+}
+
+function clr(){
+
+    disp.value="";
+}
+
+function calc(){
+
+    try{
+
+        disp.value=
+        eval(disp.value);
+
+    }catch{
+
+        disp.value=
+        "Error";
+    }
+}
+
+updateMonster();
+updateBar();
+
+</script>
+
+</body>
+</html>
